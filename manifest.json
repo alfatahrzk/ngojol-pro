@@ -1,21 +1,23 @@
 {
   "name": "Ngojol Tracker App",
   "short_name": "Ngojol",
-  "start_url": ".",
+  "start_url": "index.html",
   "display": "standalone",
   "orientation": "portrait",
+  "description": "Aplikasi Monitoring",
   "background_color": "#121212",
   "theme_color": "#121212",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "icon.svg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "icon.svg",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml"
     }
   ]
 }
