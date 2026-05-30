@@ -236,13 +236,28 @@ class SyncManager {
     }
 
     static async syncPendingTrips() {
-        if (!navigator.onLine) return;
+        // Log Diagnostik 1: Memastikan fungsi terpanggil
+        console.log("🔄 [Sync Debug] Fungsi syncPendingTrips dipicu...");
+
+        if (!navigator.onLine) {
+            console.warn("⚠️ [Sync Debug] Pendorong dibatalkan: Browser melaporkan perangkat OFFLINE.");
+            return;
+        }
 
         const repo = new TripRepository();
         const allRawTrips = repo.getAllTrips();
+        
+        // Log Diagnostik 2: Cek isi LocalStorage mentah
+        console.log("📊 [Sync Debug] Isi mentah LocalStorage:", allRawTrips);
+
+        // Menyisir data spesifik
         const pendingTrips = allRawTrips.filter(t => t.status === 'completed' && !t.isSynced);
+        
+        // Log Diagnostik 3: Cek jumlah data lolos sensor
+        console.log("🔍 [Sync Debug] Jumlah data berstatus 'completed' & belum sync:", pendingTrips.length);
 
         if (pendingTrips.length === 0) {
+            console.log("ℹ️ [Sync Debug] Tidak ada antrean data yang valid untuk dikirim. Keluar dari proses.");
             await this.checkCloudConnection();
             return;
         }
@@ -252,12 +267,14 @@ class SyncManager {
         for (const raw of pendingTrips) {
             const tripInstance = Trip.fromJSON(raw);
             try {
+                console.log(`📤 [Sync Debug] Mencoba Upsert Trip ID: ${tripInstance.tripId} ke Supabase...`);
                 await SupabaseService.upsertTrip(tripInstance);
+                
                 tripInstance.isSynced = true;
                 repo.save(tripInstance);
-                console.log(`Trip ID ${tripInstance.tripId} berhasil sinkron.`);
+                console.log(`✅ [Sync Debug] Trip ID ${tripInstance.tripId} BERHASIL sinkron.`);
             } catch (error) {
-                console.error(`Gagal sinkronisasi:`, error.message);
+                console.error(`❌ [Sync Debug] Gagal sinkronisasi di tengah jalan:`, error.message);
             }
         }
 
