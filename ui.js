@@ -121,9 +121,11 @@ function eksekusiSimpanFinansial() {
     setPembayaran('Nontunai');
 }
 
-// PWA Service Worker Registration
+// PWA Service Worker Registration (Pastikan pakai './sw.js')
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(() => console.log('PWA Service Worker Aktif'));
+    navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('PWA Service Worker Aktif & Terdaftar!', reg.scope))
+        .catch(err => console.error('Service Worker Gagal:', err));
 }
 
 /**
