@@ -1,6 +1,22 @@
-    const CACHE_NAME = 'ngojol-tracker-v1';
-// Berjalan di background untuk menangani request saat offline
-self.addEventListener('fetch', (event) => {
-    // Lu bisa tambahkan logika caching di sini nanti
-    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+const CACHE_NAME = 'ngojol-cache-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/style.css',
+  '/app.js',
+  '/ui.js',
+  '/trip-add.js',
+  '/trip-history.js'
+];
+
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request).then(response => response || fetch(event.request))
+  );
 });
