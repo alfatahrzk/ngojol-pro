@@ -135,3 +135,37 @@ function pergiKeTambahManual() {
     TripAddView.render('menu-view');
     document.getElementById('status-text').innerText = "Menyusun data tarikan manual via peta.";
 }
+
+/**
+ * HANDLER: Memaksa push semua antrean lokal ke Supabase secara manual
+ */
+async function eksekusiPushManual() {
+    document.getElementById('status-text').innerText = "⚡ Memulai sinkronisasi push manual...";
+    updateConnectionIndicator('yellow');
+    try {
+        await SyncManager.syncPendingTrips();
+        document.getElementById('status-text').innerText = "Push sukses! Seluruh antrean lokal telah aman di Cloud.";
+        // Refresh tabel riwayat biar status badge 'Lokal' langsung berubah jadi 'Cloud'
+        TripHistoryView.render('menu-view');
+    } catch (error) {
+        document.getElementById('status-text').innerText = `Gagal sinkronisasi manual: ${error.message}`;
+        updateConnectionIndicator('red');
+    }
+}
+
+/**
+ * HANDLER: Menarik data backup dari Supabase Cloud ke HP secara manual
+ */
+async function eksekusiFetchManual() {
+    document.getElementById('status-text').innerText = "⚡ Sedang menarik data dari database cloud...";
+    updateConnectionIndicator('yellow');
+    try {
+        await SyncManager.fetchCloudTrips();
+        document.getElementById('status-text').innerText = "Pull sukses! Data lokal berhasil diperbarui dari Cloud.";
+        // Refresh tabel riwayat untuk menampilkan data yang baru diunduh
+        TripHistoryView.render('menu-view');
+    } catch (error) {
+        document.getElementById('status-text').innerText = `Gagal menarik data cloud: ${error.message}`;
+        updateConnectionIndicator('red');
+    }
+}

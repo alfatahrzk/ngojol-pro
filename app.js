@@ -263,6 +263,66 @@ class SyncManager {
 
         await this.checkCloudConnection();
     }
+
+    /**
+     * Menarik seluruh data dari Supabase Cloud untuk digabungkan ke penyimpanan lokal HP
+     */
+    static async fetchCloudTrips() {
+        if (!navigator.onLine) throw new Error("Perangkat sedang offline.");
+
+        // Ambil data diurutkan dari waktu jemput terbaru
+        const endpoint = `${SUPABASE_CONFIG.url}/rest/v1/trips?order=waktu_jemput.desc`;
+        
+        const response = await fetch(endpoint, {
+            method: 'GET',
+            headers: {
+                'apikey': SUPABASE_CONFIG.anonKey,
+                'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`
+            }
+        });
+
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`Supabase Fetch Error: ${errText}`);
+        }
+
+        const cloudTrips = await response.json();
+        const repo = new TripRepository();
+        const localTrips = repo.getAllTrips();
+
+        // Proses sinkronisasi & mapping nama kolom DB Cloud ke Properti Lokal HP
+        cloudTrips.forEach(cloud => {
+            const index = localTrips.findIndex(l => l.tripId === cloud.trip_id);
+            
+            const localFormat = {
+                tripId: cloud.trip_id,
+                status: cloud.status,
+                waktuJemput: cloud.waktu_jemput,
+                koordinatJemput: cloud.koordinat_jemput,
+                waktuSelesai: cloud.waktu_selesai,
+                koordinatSelesai: cloud.koordinat_selesai,
+                jenisLayanan: cloud.jenis_layanan,
+                metodePembayaran: cloud.metode_pembayaran,
+                nominalPembayaran: cloud.nominal_pembayaran,
+                jarak: cloud.jarak,
+                isSynced: true // Set true karena bersumber langsung dari cloud
+            };
+
+            if (index !== -1) {
+                // Jika data sudah ada di lokal, timpa dengan versi terbaru dari cloud
+                localTrips[index] = localFormat;
+            } else {
+                // Jika data baru, masukkan ke barisan lokal
+                localTrips.push(localFormat);
+            }
+        });
+
+        // Simpan pembaruan gabungan ke LocalStorage HP
+        localStorage.setItem(repo.storageKey, JSON.stringify(localTrips));
+        
+        // Perbarui status lampu indikator
+        await this.checkCloudConnection();
+    }
 }
 
 /**

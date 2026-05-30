@@ -20,13 +20,22 @@ class TripHistoryView {
                     <button class="btn-back" onclick="kembaliKeDashboard()">⬅ Kembali</button>
                 </div>
             </div>
+
+            <div class="cloud-action-bar">
+                <button class="btn-cloud btn-cloud-push" onclick="eksekusiPushManual()">
+                    📤 Push Data Lokal
+                </button>
+                <button class="btn-cloud btn-cloud-fetch" onclick="eksekusiFetchManual()">
+                    📥 Pull Data Cloud
+                </button>
+            </div>
         `;
 
         if (trips.length === 0) {
             html += `
                 <div class="empty-state">
                     <p>Belum ada riwayat trip terrekam, Bang.</p>
-                    <p style="font-size: 0.9rem; color: #666; margin-top: 5px;">Gacor hari ini belum dimulai, yuk on-bid dulu!</p>
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 5px;">Gacor hari ini belum dimulai, yuk on-bid dulu atau klik "Pull Data Cloud".</p>
                 </div>
             `;
             container.innerHTML = html;
@@ -57,7 +66,6 @@ class TripHistoryView {
             const latSelesai = trip.koordinatSelesai ? Number(trip.koordinatSelesai.lat).toFixed(4) : '-';
             const lngSelesai = trip.koordinatSelesai ? Number(trip.koordinatSelesai.lng).toFixed(4) : '-';
 
-            // Format tampilan jarak angka desimal
             const formatJarak = trip.jarak ? `${Number(trip.jarak).toFixed(1)} km` : '0.0 km';
 
             const syncBadge = trip.isSynced 
