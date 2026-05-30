@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ngojol Tracker</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    <!-- Memanggil File CSS Eksternal -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- BLUR OVERLAY & SIDEBAR MENU -->
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar(false)"></div>
+    
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            <span class="sidebar-profile-title">Baginda Tracker</span>
+            <button class="btn-close-sidebar" onclick="toggleSidebar(false)">✕</button>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="menu-item" onclick="handleMenuClick('Trip')">📦 Riwayat Trip</li>
+            <li class="menu-item" onclick="handleMenuClick('Baterai')">🔋 Swap Baterai</li>
+            <li class="menu-item" onclick="handleMenuClick('Toilet')">🚾 Riwayat Toilet</li>
+        </ul>
+    </div>
+
+    <!-- TAMPILAN UTAMA -->
+    <header>
+        <div class="header-container">
+            <button class="hamburger-btn" onclick="toggleSidebar(true)">☰</button>
+            <h1>NGOJOL TRACKER</h1>
+            <div id="connection-lamp" class="lamp status-red"></div>
+        </div>
+        <p id="status-text">Ready untuk narik hari ini, Bang?</p>
+    </header>
+
+    <main>
+        <!-- LAYAR UTAMA (OPERASIONAL ON-BID) -->
+        <div id="dashboard-view">
+            <button id="btn-mulai" class="btn-action btn-mulai" onclick="eksekusiMulai()">
+                🟢 MULAI ORDER
+            </button>
+            <br>
+            <button id="btn-selesai" class="btn-action btn-selesai" onclick="eksekusiSelesai()" disabled>
+                🔴 SELESAI ORDER
+            </button>
+        </div>
+
+        <!-- LAYAR KONTEN MENU (TRIP, BATERAI, TOILET) -->
+        <div id="menu-view" style="display: none;"></div>
+    </main>
+
+    <!-- MODAL LAZY INPUT DATA FINANSIAL -->
+    <div id="lazy-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-title">Lengkapi Data Tarikan</div>
+            
+            <div class="form-group">
+                <label class="form-label">Jenis Layanan</label>
+                <div class="segment-grid">
+                    <button type="button" id="layanan-hemat" class="segment-btn active" onclick="setLayanan('Hemat')">Hemat</button>
+                    <button type="button" id="layanan-standart" class="segment-btn" onclick="setLayanan('Standart')">Standart</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Metode Pembayaran</label>
+                <div class="segment-grid">
+                    <button type="button" id="pay-nontunai" class="segment-btn active" onclick="setPembayaran('Nontunai')">Non-Tunai</button>
+                    <button type="button" id="pay-qr" class="segment-btn" onclick="setPembayaran('QR')">QR</button>
+                    <button type="button" id="pay-tunai" class="segment-btn" onclick="setPembayaran('Tunai')">Tunai</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Nominal Pendapatan (Rp)</label>
+                <input type="number" id="input-argo" class="input-nominal" placeholder="0" pattern="[0-9]*" inputmode="numeric">
+            </div>
+
+            <button class="btn-submit" onclick="eksekusiSimpanFinansial()">SIMPAN DATA</button>
+        </div>
+    </div>
+
+    <footer>
+        PWA Data Strategy v1.1 • Offline Storage Enabled
+    </footer>
+
+    <!-- Urutan Script: app.js wajib dimuat duluan karena ui.js bergantung pada core logic di app.js -->
+    <script src="app.js"></script>
+    <script src="trip-history.js"></script>
+    <!-- Daftarkan file form manual di sini -->
+    <script src="trip-add.js"></script>
+    <script src="ui.js"></script>
+</body>
+</html>
