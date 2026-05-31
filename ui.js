@@ -22,19 +22,22 @@ function toggleSidebar(open) {
 
 function handleMenuClick(menuName) {
     console.log(`Menu ${menuName} diklik.`);
-    toggleSidebar(false); // Tutup sidebar otomatis
+    toggleSidebar(false); 
 
     if (menuName === 'Trip') {
-        // 1. Sembunyikan Dashboard, Munculkan wadah Menu
         document.getElementById('dashboard-view').style.display = 'none';
         document.getElementById('menu-view').style.display = 'block';
-
-        // 2. Perintahkan komponen trip-history.js untuk merender tabel ke dalam wadah tersebut
         TripHistoryView.render('menu-view');
-        
         document.getElementById('status-text').innerText = "Melihat rekaman riwayat narik.";
-    } else {
-        // Placeholder untuk menu Baterai dan Toilet nanti
+    } 
+    // TAMBAHKAN BLOK ELSE IF INI
+    else if (menuName === 'Analitik') {
+        document.getElementById('dashboard-view').style.display = 'none';
+        document.getElementById('menu-view').style.display = 'block';
+        AnalyticsView.render('menu-view');
+        document.getElementById('status-text').innerText = "Menganalisis performa tarikan.";
+    } 
+    else {
         alert(`Menu ${menuName} sedang dipersiapkan.`);
     }
 }
