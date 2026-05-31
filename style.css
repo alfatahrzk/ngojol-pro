@@ -643,3 +643,61 @@ footer {
     border-color: #fbbf24;
     background: linear-gradient(145deg, #1a1a1a 0%, #30260c 100%);
 }
+
+/* DESIGN STYLES FOR FOOD & EXPRESS EXTENSION */
+.text-orange { color: #f97316; }
+.text-purple { color: #a855f7; }
+
+.layanan-food { color: #f97316; font-weight: bold; }
+.layanan-express { color: #a855f7; font-weight: bold; }
+
+.food-card {
+    border-color: #f97316;
+    background: linear-gradient(145deg, #1a1a1a 0%, #30180c 100%);
+}
+
+.express-card {
+    border-color: #a855f7;
+    background: linear-gradient(145deg, #1a1a1a 0%, #230c30 100%);
+}
+
+.segment-food { background-color: #f97316; }
+.segment-express { background-color: #a855f7; }
+
+/* PAGINATION INTERFACE STYLES */
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    padding: 10px;
+    background-color: #1a1a1a;
+    border: 1px solid #262626;
+    border-radius: 12px;
+}
+
+.btn-page {
+    background-color: #262626;
+    border: 1px solid #3a3a3a;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.btn-page:disabled {
+    background-color: #121212;
+    color: #525252;
+    border-color: #232323;
+    cursor: not-allowed;
+}
+
+.page-info {
+    font-size: 0.85rem;
+    color: #a3a3a3;
+    font-weight: 600;
+}

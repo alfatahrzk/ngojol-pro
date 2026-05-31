@@ -1,16 +1,19 @@
 /**
  * ==========================================
- * COMPONENT: Trip History Table View
+ * COMPONENT: Trip History Table View (With Pagination)
  * ==========================================
  */
 class TripHistoryView {
+    static currentPage = 1;
+    static itemsPerPage = 10; // Kunci limit muat data per halaman
+
     /** Merender tabel riwayat perjalanan */
     static render(containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
 
         const repo = new TripRepository();
-        const trips = repo.getAllTrips().reverse(); 
+        const allTrips = repo.getAllTrips().reverse(); 
 
         let html = `
             <div class="view-header">
@@ -31,7 +34,7 @@ class TripHistoryView {
             </div>
         `;
 
-        if (trips.length === 0) {
+        if (allTrips.length === 0) {
             html += `
                 <div class="empty-state">
                     <p>Belum ada riwayat trip terrekam, Bang.</p>
@@ -41,6 +44,17 @@ class TripHistoryView {
             container.innerHTML = html;
             return;
         }
+
+        // PROSES HITUNGAN MATEMATIKA PAGINATION
+        const totalItems = allTrips.length;
+        const totalPages = Math.ceil(totalItems / this.itemsPerPage);
+        
+        if (this.currentPage > totalPages) this.currentPage = totalPages;
+        if (this.currentPage < 1) this.currentPage = 1;
+
+        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+        const endIndex = startIndex + this.itemsPerPage;
+        const pagedTrips = allTrips.slice(startIndex, endIndex); // Ekstrak hanya 10 item aktif
 
         html += `
             <div class="table-responsive">
@@ -56,7 +70,7 @@ class TripHistoryView {
                     <tbody>
         `;
 
-        trips.forEach(trip => {
+        pagedTrips.forEach(trip => {
             const waktuObj = new Date(trip.waktuJemput);
             const waktuStr = waktuObj.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
             const tglStr = waktuObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
@@ -95,8 +109,20 @@ class TripHistoryView {
                     </tbody>
                 </table>
             </div>
+
+            <div class="pagination-container">
+                <button class="btn-page" ${this.currentPage === 1 ? 'disabled' : ''} onclick="TripHistoryView.changePage(${this.currentPage - 1}, '${containerId}')">◀ Prev</button>
+                <span class="page-info">Halaman ${this.currentPage} dari ${totalPages}</span>
+                <button class="btn-page" ${this.currentPage === totalPages ? 'disabled' : ''} onclick="TripHistoryView.changePage(${this.currentPage + 1}, '${containerId}')">Next ▶</button>
+            </div>
         `;
 
         container.innerHTML = html;
+    }
+
+    /** Memicu render ulang sub-halaman riwayat */
+    static changePage(newPage, containerId) {
+        this.currentPage = newPage;
+        this.render(containerId);
     }
 }

@@ -97,6 +97,8 @@ function setLayanan(layanan) {
     selectedLayanan = layanan;
     document.getElementById('layanan-hemat').classList.toggle('active', layanan === 'Hemat');
     document.getElementById('layanan-standart').classList.toggle('active', layanan === 'Standart');
+    document.getElementById('layanan-food').classList.toggle('active', layanan === 'Food');
+    document.getElementById('layanan-express').classList.toggle('active', layanan === 'Express');
 }
 
 function setPembayaran(metode) {

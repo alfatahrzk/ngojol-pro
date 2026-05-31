@@ -67,7 +67,7 @@ class TripAddView {
             if (data.routes && data.routes.length > 0) {
                 const routeGeoJSON = data.routes[0].geometry;
                 
-                // Konversi jarak m ke KM
+                // Konversi jarak meter ke KM
                 const distanceMeters = data.routes[0].distance;
                 this.currentCalculatedDistance = distanceMeters / 1000;
 
@@ -151,6 +151,8 @@ class TripAddView {
                         <select id="manual-layanan" class="input-field select-field">
                             <option value="Hemat">Hemat</option>
                             <option value="Standart">Standart</option>
+                            <option value="Food">Food</option>
+                            <option value="Express">Express</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -169,12 +171,12 @@ class TripAddView {
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Koordinat Jemput (Format: Lat, Long)</label>
+                    <label class="form-label">Koordinat Jemput/Pick-up (Format: Lat, Long)</label>
                     <input type="text" id="manual-coord-jemput" class="input-field" placeholder="-7.2504, 112.7688" oninput="TripAddView.updatePreview()">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Koordinat Tujuan (Format: Lat, Long)</label>
+                    <label class="form-label">Koordinat Tujuan/Drop-off (Format: Lat, Long)</label>
                     <input type="text" id="manual-coord-selesai" class="input-field" placeholder="-7.3001, 112.7389" oninput="TripAddView.updatePreview()">
                 </div>
 
@@ -288,7 +290,10 @@ class TripAddView {
             manualTrip.waktuSelesai = new Date(waktuSelesaiInput).toISOString();
             manualTrip.koordinatSelesai = new GeoLocation(posSelesai.lat, posSelesai.lng);
             
+            // Loloskan layanan baru (Food & Express) ke app.js
             manualTrip.updateFinancials(layanan, metode, nominal);
+            
+            // Simpan jarak real kalkulasi dari Mapbox
             manualTrip.jarak = this.currentCalculatedDistance;
 
             const repo = new TripRepository();

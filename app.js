@@ -62,7 +62,8 @@ class Trip {
     }
 
     updateFinancials(layanan, metode, nominal) {
-        const validLayanan = ['Hemat', 'Standart'];
+        // Tambahkan Food dan Express ke dalam whitelist aturan
+        const validLayanan = ['Hemat', 'Standart', 'Food', 'Express'];
         const validMetode = ['Tunai', 'QR', 'Nontunai'];
 
         if (!validLayanan.includes(layanan)) throw new Error("Layanan tidak valid.");
