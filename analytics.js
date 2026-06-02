@@ -1,6 +1,6 @@
 /**
  * ==========================================
- * COMPONENT: Analytics Dashboard View (Predictive Pro v2.2)
+ * COMPONENT: Analytics Dashboard View (Predictive Pro v2.4 - Net Margin & Time Yield)
  * ==========================================
  */
 class AnalyticsView {
@@ -11,37 +11,87 @@ class AnalyticsView {
         const container = document.getElementById(containerId);
         if (!container) return;
 
-        container.innerHTML = `<div class="empty-state"><p>☕ Memuat Radar Prediksi Gacor...</p></div>`;
+        container.innerHTML = `<div class="empty-state"><p>☕ Menghitung efisiensi waktu, jarak, dan arus kas...</p></div>`;
 
         const repo = new TripRepository();
         const trips = repo.getAllTrips().filter(t => t.status === 'completed');
 
-        let totalPendapatan = 0, totalJarak = 0, totalTrip = trips.length;
+        let totalPendapatanKotor = 0, totalJarak = 0, totalTrip = trips.length;
 
-        let hematCount = 0, totalPendapatanHemat = 0, totalJarakHemat = 0;
-        let standartCount = 0, totalPendapatanStandart = 0, totalJarakStandart = 0;
-        let foodCount = 0, totalPendapatanFood = 0, totalJarakFood = 0;
-        let expressCount = 0, totalPendapatanExpress = 0, totalJarakExpress = 0;
+        // Variabel Jarak & Arus Kas
+        let hematCount = 0, totalPendapatanHemat = 0, totalJarakHemat = 0, totalMenitHemat = 0;
+        let standartCount = 0, totalPendapatanStandart = 0, totalJarakStandart = 0, totalMenitStandart = 0;
+        let foodCount = 0, totalPendapatanFood = 0, totalJarakFood = 0, totalMenitFood = 0;
+        let expressCount = 0, totalPendapatanExpress = 0, totalJarakExpress = 0, totalMenitExpress = 0;
+
+        let hematOrdersPerDay = {};
 
         trips.forEach(trip => {
-            totalPendapatan += trip.nominalPembayaran || 0;
+            totalPendapatanKotor += trip.nominalPembayaran || 0;
             totalJarak += trip.jarak || 0;
             
+            // Kalkulasi Durasi Waktu (Menit)
+            let durasiMenit = 0;
+            if (trip.waktuJemput && trip.waktuSelesai) {
+                const start = new Date(trip.waktuJemput);
+                const end = new Date(trip.waktuSelesai);
+                durasiMenit = (end - start) / (1000 * 60); // Konversi milidetik ke menit
+                if (durasiMenit < 0) durasiMenit = 0; // Proteksi kalau ada bug jam mundur
+            }
+            
             if (trip.jenisLayanan === 'Hemat') {
-                hematCount++; totalPendapatanHemat += trip.nominalPembayaran || 0; totalJarakHemat += trip.jarak || 0;
+                hematCount++; 
+                totalPendapatanHemat += trip.nominalPembayaran || 0; 
+                totalJarakHemat += trip.jarak || 0;
+                totalMenitHemat += durasiMenit;
+
+                const dateObj = new Date(trip.waktuJemput);
+                const dateKey = dateObj.toLocaleDateString('id-ID');
+                hematOrdersPerDay[dateKey] = (hematOrdersPerDay[dateKey] || 0) + 1;
+
             } else if (trip.jenisLayanan === 'Standart') {
-                standartCount++; totalPendapatanStandart += trip.nominalPembayaran || 0; totalJarakStandart += trip.jarak || 0;
+                standartCount++; 
+                totalPendapatanStandart += trip.nominalPembayaran || 0; 
+                totalJarakStandart += trip.jarak || 0;
+                totalMenitStandart += durasiMenit;
             } else if (trip.jenisLayanan === 'Food') {
-                foodCount++; totalPendapatanFood += trip.nominalPembayaran || 0; totalJarakFood += trip.jarak || 0;
+                foodCount++; 
+                totalPendapatanFood += trip.nominalPembayaran || 0; 
+                totalJarakFood += trip.jarak || 0;
+                totalMenitFood += durasiMenit;
             } else if (trip.jenisLayanan === 'Express') {
-                expressCount++; totalPendapatanExpress += trip.nominalPembayaran || 0; totalJarakExpress += trip.jarak || 0;
+                expressCount++; 
+                totalPendapatanExpress += trip.nominalPembayaran || 0; 
+                totalJarakExpress += trip.jarak || 0;
+                totalMenitExpress += durasiMenit;
             }
         });
 
-        const yieldHemat = totalJarakHemat > 0 ? (totalPendapatanHemat / totalJarakHemat) : 0;
-        const yieldStandart = totalJarakStandart > 0 ? (totalPendapatanStandart / totalJarakStandart) : 0;
-        const yieldFood = totalJarakFood > 0 ? (totalPendapatanFood / totalJarakFood) : 0;
-        const yieldExpress = totalJarakExpress > 0 ? (totalPendapatanExpress / totalJarakExpress) : 0;
+        // Kalkulasi Total Biaya Langganan Hemat
+        let totalPotonganHemat = 0;
+        Object.values(hematOrdersPerDay).forEach(jumlahOrder => {
+            if (jumlahOrder >= 1 && jumlahOrder <= 2) totalPotonganHemat += 3000;
+            else if (jumlahOrder >= 3 && jumlahOrder <= 4) totalPotonganHemat += 8500;
+            else if (jumlahOrder >= 5 && jumlahOrder <= 6) totalPotonganHemat += 13500;
+            else if (jumlahOrder >= 7 && jumlahOrder <= 9) totalPotonganHemat += 18000;
+            else if (jumlahOrder >= 10) totalPotonganHemat += 20000;
+        });
+
+        // Cari Pendapatan Bersih (Net)
+        const netPendapatanHemat = totalPendapatanHemat - totalPotonganHemat;
+        const totalPendapatanBersih = totalPendapatanKotor - totalPotonganHemat;
+
+        // Kalkulasi Yield/KM (Efisiensi Bensin)
+        const yieldKmHemat = totalJarakHemat > 0 ? (netPendapatanHemat / totalJarakHemat) : 0;
+        const yieldKmStandart = totalJarakStandart > 0 ? (totalPendapatanStandart / totalJarakStandart) : 0;
+        const yieldKmFood = totalJarakFood > 0 ? (totalPendapatanFood / totalJarakFood) : 0;
+        const yieldKmExpress = totalJarakExpress > 0 ? (totalPendapatanExpress / totalJarakExpress) : 0;
+
+        // Kalkulasi Yield/Menit (Efisiensi Waktu)
+        const yieldMntHemat = totalMenitHemat > 0 ? (netPendapatanHemat / totalMenitHemat) : 0;
+        const yieldMntStandart = totalMenitStandart > 0 ? (totalPendapatanStandart / totalMenitStandart) : 0;
+        const yieldMntFood = totalMenitFood > 0 ? (totalPendapatanFood / totalMenitFood) : 0;
+        const yieldMntExpress = totalMenitExpress > 0 ? (totalPendapatanExpress / totalMenitExpress) : 0;
 
         await TripAddView.loadMapbox();
 
@@ -53,8 +103,9 @@ class AnalyticsView {
 
             <div class="analytics-container">
                 <div class="stat-card main-stat-card">
-                    <div class="stat-title">Total Arus Kas Masuk</div>
-                    <div class="stat-value text-gacor">Rp ${totalPendapatan.toLocaleString('id-ID')}</div>
+                    <div class="stat-title">Total Arus Kas Masuk (Net)</div>
+                    <div class="stat-value text-gacor">Rp ${totalPendapatanBersih.toLocaleString('id-ID')}</div>
+                    <div class="stat-desc">Dipotong biaya langganan Hemat (Rp ${totalPotonganHemat.toLocaleString('id-ID')})</div>
                 </div>
 
                 <div class="analytics-grid">
@@ -68,24 +119,33 @@ class AnalyticsView {
                     </div>
                 </div>
 
-                <div class="stat-title" style="margin-top: 10px;">Yield / KM Per Layanan</div>
+                <div class="stat-title" style="margin-top: 10px;">Efisiensi Layanan (Bensin vs Waktu)</div>
                 <div class="analytics-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                    
                     <div class="stat-card highlight-card hemat-card">
-                        <div class="stat-title text-blue">HEMAT</div>
-                        <div class="stat-value" style="font-size:1.3rem;">Rp ${yieldHemat.toLocaleString('id-ID', { maximumFractionDigits: 0 })}</div>
+                        <div class="stat-title text-blue">HEMAT (NET)</div>
+                        <div class="stat-value" style="font-size:1.1rem;">Rp ${yieldKmHemat.toLocaleString('id-ID', { maximumFractionDigits: 0 })} <span class="stat-unit" style="font-size:0.7rem;">/km</span></div>
+                        <div class="stat-value" style="font-size:1.1rem; color:#a3a3a3; margin-top:4px;">Rp ${yieldMntHemat.toLocaleString('id-ID', { maximumFractionDigits: 0 })} <span class="stat-unit" style="font-size:0.7rem;">/mnt</span></div>
                     </div>
+                    
                     <div class="stat-card highlight-card standart-card">
                         <div class="stat-title text-yellow">STANDART</div>
-                        <div class="stat-value" style="font-size:1.3rem;">Rp ${yieldStandart.toLocaleString('id-ID', { maximumFractionDigits: 0 })}</div>
+                        <div class="stat-value" style="font-size:1.1rem;">Rp ${yieldKmStandart.toLocaleString('id-ID', { maximumFractionDigits: 0 })} <span class="stat-unit" style="font-size:0.7rem;">/km</span></div>
+                        <div class="stat-value" style="font-size:1.1rem; color:#a3a3a3; margin-top:4px;">Rp ${yieldMntStandart.toLocaleString('id-ID', { maximumFractionDigits: 0 })} <span class="stat-unit" style="font-size:0.7rem;">/mnt</span></div>
                     </div>
+                    
                     <div class="stat-card highlight-card food-card">
                         <div class="stat-title text-orange">FOOD</div>
-                        <div class="stat-value" style="font-size:1.3rem;">Rp ${yieldFood.toLocaleString('id-ID', { maximumFractionDigits: 0 })}</div>
+                        <div class="stat-value" style="font-size:1.1rem;">Rp ${yieldKmFood.toLocaleString('id-ID', { maximumFractionDigits: 0 })} <span class="stat-unit" style="font-size:0.7rem;">/km</span></div>
+                        <div class="stat-value" style="font-size:1.1rem; color:#a3a3a3; margin-top:4px;">Rp ${yieldMntFood.toLocaleString('id-ID', { maximumFractionDigits: 0 })} <span class="stat-unit" style="font-size:0.7rem;">/mnt</span></div>
                     </div>
+                    
                     <div class="stat-card highlight-card express-card">
                         <div class="stat-title text-purple">EXPRESS</div>
-                        <div class="stat-value" style="font-size:1.3rem;">Rp ${yieldExpress.toLocaleString('id-ID', { maximumFractionDigits: 0 })}</div>
+                        <div class="stat-value" style="font-size:1.1rem;">Rp ${yieldKmExpress.toLocaleString('id-ID', { maximumFractionDigits: 0 })} <span class="stat-unit" style="font-size:0.7rem;">/km</span></div>
+                        <div class="stat-value" style="font-size:1.1rem; color:#a3a3a3; margin-top:4px;">Rp ${yieldMntExpress.toLocaleString('id-ID', { maximumFractionDigits: 0 })} <span class="stat-unit" style="font-size:0.7rem;">/mnt</span></div>
                     </div>
+
                 </div>
 
                 <div class="stat-card">
@@ -175,7 +235,6 @@ class AnalyticsView {
         });
     }
 
-    /** FILTER ALGORITMA PREDIKSI 1 JAM KE DEPAN */
     static applyHeatmapFilter() {
         if (!this.mapInstance || !this.rawGeoJSON) return;
 
@@ -184,11 +243,9 @@ class AnalyticsView {
         let filteredFeatures = this.rawGeoJSON.features;
 
         if (filterValue === 'prediksi_depan') {
-            // 1. Dapatkan jam dan menit HP saat ini
             const sekarang = new Date();
             const currentTotalMinutes = (sekarang.getHours() * 60) + sekarang.getMinutes();
             
-            // Hitung 1 jam ke depan untuk UI text
             let satuJamKedepanMenit = currentTotalMinutes + 60;
             if (satuJamKedepanMenit >= 24 * 60) satuJamKedepanMenit -= (24 * 60);
 
@@ -200,18 +257,11 @@ class AnalyticsView {
             
             descLabel.innerHTML = `Prediksi titik kumpul order <b style="color:#22c55e;">${timeFormatStr(currentTotalMinutes)} s/d ${timeFormatStr(satuJamKedepanMenit)}</b> dari histori semua hari.`;
 
-            // 2. LOGIKA FORWARD-LOOKING (Prediksi Depan)
             filteredFeatures = this.rawGeoJSON.features.filter(f => {
                 const orderTotalMinutes = (f.properties.jam * 60) + f.properties.menit;
-                
-                // Kurangi waktu order dengan waktu sekarang
                 let diff = orderTotalMinutes - currentTotalMinutes;
                 
-                // Jika waktu order lebih kecil (contoh: sekarang 23:45, order histori jam 00:30 besoknya)
-                // Kita tambahkan 24 jam ke perhitungan agar tidak error minus
                 if (diff < 0) diff += 24 * 60; 
-
-                // Lolos sensor JIKA order terjadi antara 0 sampai 60 menit KE DEPAN dari jam HP sekarang
                 return diff >= 0 && diff <= 60;
             });
 
@@ -234,7 +284,6 @@ class AnalyticsView {
             }
         }
 
-        // Tembak data hasil prediksi ke Mapbox
         this.mapInstance.getSource('titik-jemput').setData({
             "type": "FeatureCollection", "features": filteredFeatures
         });

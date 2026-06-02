@@ -30,13 +30,19 @@ function handleMenuClick(menuName) {
         TripHistoryView.render('menu-view');
         document.getElementById('status-text').innerText = "Melihat rekaman riwayat narik.";
     } 
-    // TAMBAHKAN BLOK ELSE IF INI
     else if (menuName === 'Analitik') {
         document.getElementById('dashboard-view').style.display = 'none';
         document.getElementById('menu-view').style.display = 'block';
         AnalyticsView.render('menu-view');
         document.getElementById('status-text').innerText = "Menganalisis performa tarikan.";
     } 
+    // 👉 TAMBAHKAN BLOK TARGET INI
+    else if (menuName === 'Target') {
+        document.getElementById('dashboard-view').style.display = 'none';
+        document.getElementById('menu-view').style.display = 'block';
+        TargetView.render('menu-view');
+        document.getElementById('status-text').innerText = "Memantau progres target bulanan.";
+    }
     else {
         alert(`Menu ${menuName} sedang dipersiapkan.`);
     }
